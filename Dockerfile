@@ -1,25 +1,21 @@
-FROM runpod/base:0.4.0-cpu
+FROM python:3.10-slim
 
-# Install Python and dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    python3.10 \
-    python3-pip \
     libgl1-mesa-glx \
     libglib2.0-0 \
+    libgomp1 \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
 WORKDIR /app
 
-# Copy requirements
+# Copy and install Python dependencies
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Python packages
-RUN pip3 install --no-cache-dir -r requirements.txt
-
-# Copy handler
-COPY handler.py .
-COPY measurement_utils.py .
+# Copy application files
+COPY . .
 
 # RunPod handler
-CMD ["python3", "-u", "handler.py"]
+CMD ["python", "-u", "handler.py"]
